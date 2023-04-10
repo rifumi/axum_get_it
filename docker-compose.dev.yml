@@ -1,0 +1,32 @@
+version: '3.2'
+
+services:
+  axum_get_it:
+    build:
+      context: ./${APP_NAME}
+      dockerfile: Dockerfile
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GID}
+        USER_NAME: ${UNAME}
+        APP_EARTH_PATH: ${APP_EARTH_PATH}
+        APP_NAME: ${APP_NAME}
+    ports:
+      - ${HOST_PORT}:3000
+      - 9229:9229
+    volumes:
+      - ${PWD}/${APP_NAME}:${APP_EARTH_PATH}/${APP_NAME}
+    networks:
+      rust_get_it_net:
+        ipv4_address: 172.22.0.10
+    user: "${USER_ID}:${GID}"
+    # the third priority DOCKER_HOST
+    # environment:
+      # - DOCKER_HOST=ssh://${UNAME}@localhost:${SSH_PORT}
+networks:
+  rust_get_it_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.22.0.0/24
