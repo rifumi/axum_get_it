@@ -20,6 +20,8 @@ services:
       rust_get_it_net:
         ipv4_address: 172.22.0.10
     user: "${USER_ID}:${GID}"
+    environment:
+      - RUST_LOG=debug
     # the third priority DOCKER_HOST
     # environment:
       # - DOCKER_HOST=ssh://${UNAME}@localhost:${SSH_PORT}
