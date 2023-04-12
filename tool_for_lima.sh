@@ -4,7 +4,7 @@ source .env
 export DOCKER_HOST=unix:///$HOME/.lima/$ENV_NAME/sock/docker.sock
 echo "\$1=$1"
 
-if [ "$1" == "curl" ]; then
+if [ "$1" == "curl" ] && [ "$2" == "root" ]; then
   ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $id)
   echo "curl 127.0.0.1:$HOST_PORT"
   curl --connect-timeout 3 http://127.0.0.1:$HOST_PORT
@@ -27,6 +27,17 @@ if [ "$1" == "curl" ]; then
   echo "curl $ip:3000"
   curl --connect-timeout 3 http://$ip:3000
   echo ""
+fi
+if [ "$1" == "curl" ] && [ "$2" == "users" ];then
+  ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $id)
+  curl --connect-timeout 3 -H "Content-Type: application/json" -d '{"username": "Ohtani"}' http://127.0.0.1:$HOST_PORT/users;echo "";
+  curl --connect-timeout 3 -H "Content-Type: application/json" -d '{"username": "Ohtani"}' http://127.0.0.1:3000/users;echo "";
+  curl --connect-timeout 3 -H "Content-Type: application/json" -d '{"username": "Ohtani"}' http://0.0.0.0:$HOST_PORT/users;echo "";
+  curl --connect-timeout 3 -H "Content-Type: application/json" -d '{"username": "Ohtani"}' http://0.0.0.0:3000/users;echo "";
+  curl --connect-timeout 3 -H "Content-Type: application/json" -d '{"username": "Ohtani"}' http://localhost:$HOST_PORT/users;echo "";
+  curl --connect-timeout 3 -H "Content-Type: application/json" -d '{"username": "Ohtani"}' http://localhost:3000/users;echo "";
+  curl --connect-timeout 3 -H "Content-Type: application/json" -d '{"username": "Ohtani"}' http://$ip:$HOST_PORT/users;echo "";
+  curl --connect-timeout 3 -H "Content-Type: application/json" -d '{"username": "Ohtani"}' http://$ip:3000/users;echo "";
 fi
 
 if [ "$1" == "/bin/bash" ];then
