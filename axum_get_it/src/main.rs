@@ -1,4 +1,12 @@
-use axum::{routing::get, Router};
+use axum::{
+    routing::{
+        get
+    }
+    , Router
+    , response::{
+        Html
+    }
+};
 use std::net::{SocketAddr, Ipv4Addr};
 use std::env;
 
@@ -20,8 +28,8 @@ async fn main() {
         .unwrap();
 }
 
-async fn root() -> &'static str {
-    "Hello, world!\n"
+async fn root() -> Html<&'static str> {
+    Html("<h1>Hello, world!</h1>")
 }
 
 #[cfg(test)]
@@ -29,7 +37,8 @@ mod tests {
     use super::root;
     #[tokio::test]
     async fn test_root() {
-        let s = root().await;
-        assert_eq!(s.to_string(), "Hello, world!\n");
+        let s1 = root().await;
+        let s = s1.0.to_owned();
+        assert_eq!(s, "<h1>Hello, world!</h1>");
     }
 }
