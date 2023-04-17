@@ -5,6 +5,11 @@
             "label": "build",
             "type": "shell",
             "command": "cargo build",
+            "options": {
+                "env": {
+                    "CARGO_INCREMENTAL": "1"
+                }
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
