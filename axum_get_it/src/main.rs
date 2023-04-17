@@ -23,9 +23,7 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
     // container port:3000にリクエストを受信した時のrouting設定
-    let app = Router::new()
-        .route("/", get(root))
-        .route("/users", post(create_user));
+    let app = create_app();
     let addr = SocketAddr::from((Ipv4Addr::UNSPECIFIED, 3000));
     tracing::debug!("listening on {}", addr);
 
@@ -33,6 +31,12 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+fn create_app() -> Router {
+    return Router::new()
+        .route("/", get(root))
+        .route("/users", post(create_user));
 }
 
 async fn root() -> Html<&'static str> {
@@ -81,5 +85,35 @@ mod tests {
         let bytes = hyper::body::to_bytes(body).await.unwrap();
         let user: User = serde_json::from_slice(&bytes).unwrap();
         assert_eq!(user, User { id: 1337, username: "Takeshi".to_string() });
+    }
+
+    use axum::{
+        body::Body
+        ,http::{
+            header
+            ,Method
+            ,Request
+        }
+    };
+    use tower::ServiceExt;
+    #[tokio::test]
+    async fn should_return_hello_world() {
+        let req = Request::builder().uri("/").body(Body::empty()).unwrap();
+        let res = create_app().oneshot(req).await.unwrap();
+        let bytes = hyper::body::to_bytes(res.into_body()).await.unwrap();
+        let body = String::from_utf8(bytes.to_vec()).unwrap();
+        assert_eq!(body, "<h1>Hello, world!</h1>");
+    }
+    #[tokio::test]
+    async fn should_return_user_data() {
+        let req = Request::builder().uri("/users")
+            .method(Method::POST)
+            .header(header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+            .body(Body::from(r#"{ "username": "Munetaka Murakami" }"#)).unwrap();
+        let res = create_app().oneshot(req).await.unwrap();
+        let bytes = hyper::body::to_bytes(res.into_body()).await.unwrap();
+        let body = String::from_utf8(bytes.to_vec()).unwrap();
+        let user: User = serde_json::from_str(&body).expect("cannot convert User instance.");
+        assert_eq!(user, User { id: 1337, username: "Munetaka Murakami".to_string()});
     }
 }
